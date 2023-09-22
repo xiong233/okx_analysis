@@ -1,0 +1,46 @@
+name: okx
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  schedule:
+    - cron: "58,28 * * * *"
+    # 每个小时的28分和58分 开始执行
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: 'Set up Python'
+        uses: actions/setup-python@v1
+        with:
+           python-version: '3.10'
+      - name: 'Install requirements'
+        run: pip install -r requirements.txt
+      - name: 'Working'
+        run:
+          python main.pyc ${{ secrets.wechat_token }} ${{ secrets.oss_ak }} ${{ secrets.oss_sk }}
+      - name: commit
+        run: |
+          git config --global user.email ${{ secrets.email }}
+          git config --global user.name ${{ secrets.name }}
+          git add .
+          git commit -m "update by action"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.token }}
+         
